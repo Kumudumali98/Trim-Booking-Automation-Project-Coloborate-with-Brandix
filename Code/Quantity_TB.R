@@ -87,31 +87,21 @@ file_path <- file.choose()
 plm_data <- read_excel(file_path)
 
 # Inner join based on the "ID" column
-merged_df <- inner_join(plm_data, Total_Order_Summary , by = "Style Number", "Color", relationship = "many-to-many")
+merged_df <- inner_join(plm_data, Total_Order_Summary , by = "Style Number", "Style Color", relationship = "many-to-many")
 
 
-# result <- merged_df %>%
-#   select('Style Number', 'Color', 'RM Reference', 'Color Tracking RM Color', 'Consumption', '3XS', '2XS', 'XS','S','M', 'L', 'XL', '2XL')
-# 
-# result[6:13] <- 0
-# 
-# counter = 6
-# for (i in 49:56) {
-#   result[counter] <- merged_df[i] * merged_df$Consumption
-#   print(i, counter)
-#   #print(result[counter])
-#   counter = counter + 1
-# }
-# 
-# 
-# for (i in 48:56) {
-#   result <- merged_df %>%
-#     mutate(merged_df[i] * Consumption)
-# }
-# 
-# 
-# excel_file <- "result.xlsx"
-# 
-# # Export Total_Order_Summary as an Excel file
-# write.xlsx(result, excel_file, rowNames = FALSE)
-# 
+result <- merged_df
+
+result[12:19] <- 0
+
+counter = 12
+for (i in 12:19) {
+  result[counter] <- ceiling(merged_df[i] * merged_df$Consumption * (1+merged_df$Wastage))
+  counter = counter + 1
+}
+
+excel_file <- "result.xlsx"
+
+# Export Total_Order_Summary as an Excel file
+write.xlsx(result, excel_file, rowNames = FALSE)
+
