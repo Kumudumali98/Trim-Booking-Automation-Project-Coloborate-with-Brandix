@@ -3,6 +3,7 @@
 library(readxl)
 library(openxlsx)
 library(dplyr)
+library(janitor)
 
 # Initialize a counter variable
 counter = 0
@@ -123,4 +124,16 @@ excel_file <- "result.xlsx"
 write.xlsx(result, excel_file, rowNames = FALSE)
 
 ####################Comparison############################################3
+
+# Merge the data frames on the 'ProductName' column
+new_df1 <- merge(result, final, by = c("RM Reference", "RM Color"), suffixes = c("_result", "_final"), all = TRUE)
+
+new_df2 <- new_df1 %>% select(`RM Reference`, 'RM Color')
+
+# Calculate the differences for retail prices and quantities
+size_columns <- c("3XS", "2XS", "XS", "S", "M", "L", "XL", "2XL")
+for (col in size_columns) {
+  new_df2[[paste0(col, "_Diff.")]] <- new_df1[[paste0(col, "_final")]] - new_df1[[paste0(col, "_result")]]
+}
+
 
