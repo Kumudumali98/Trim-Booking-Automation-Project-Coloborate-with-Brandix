@@ -109,27 +109,18 @@ for (i in 12:19) {
 }
 
 result <- result %>% rename(Style_Number = `Style Number`)
+result <- result[result$Consumption != 0 | result$`RM Color` != "N/A",]
 
-final <- result
 
-final <- result %>% 
+result <- result %>% 
   group_by(`RM Reference`, `RM Color`) %>%
   summarise(across(c(`3XS`, `2XS`, `XS`, `S`, `M`, `L`, `XL`, `2XL`), sum))
 
-final
 
 excel_file <- "result.xlsx"
 
 # Export Total_Order_Summary as an Excel file
 write.xlsx(result, excel_file, rowNames = FALSE)
 
-
-############################Database##############################################333
-library(DBI)
-library(RSQLite)
-library(dplyr)
-
-portaldb <- dbConnect(SQLite(), "portal.sqlite")
-
-dbListTables(portaldb)
+####################Comparison############################################3
 
