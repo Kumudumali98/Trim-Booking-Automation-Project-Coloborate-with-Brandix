@@ -108,6 +108,16 @@ for (i in 12:19) {
   counter = counter + 1
 }
 
+result <- result %>% rename(Style_Number = `Style Number`)
+
+final <- result
+
+final <- result %>% 
+  group_by(`RM Reference`, `RM Color`) %>%
+  summarise(across(c(`3XS`, `2XS`, `XS`, `S`, `M`, `L`, `XL`, `2XL`), sum))
+
+final
+
 excel_file <- "result.xlsx"
 
 # Export Total_Order_Summary as an Excel file
