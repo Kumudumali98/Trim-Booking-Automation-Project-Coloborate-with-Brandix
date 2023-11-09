@@ -87,8 +87,16 @@ file_path <- file.choose()
 plm_data <- read_excel(file_path)
 
 # Inner join based on the "ID" column
-merged_df <- inner_join(plm_data, Total_Order_Summary , by = "Style Number", "Style Color", relationship = "many-to-many")
+#merged_df <- full_join(plm_data, Total_Order_Summary , by = c("Style Number", "Style Color"), relationship = "one-to-one")
 
+plm_data <- plm_data %>% mutate(Style_Color = toupper(plm_data$`Color`), .keep = "unused")
+
+Total_Order_Summary <-  Total_Order_Summary %>% rename(Style_Color = Colors)
+
+
+merged_df <- merge(x = plm_data, y = Total_Order_Summary, 
+                   by = c("Style Number", "Style_Color"),
+                   all.x = T)
 
 result <- merged_df
 
@@ -104,4 +112,14 @@ excel_file <- "result.xlsx"
 
 # Export Total_Order_Summary as an Excel file
 write.xlsx(result, excel_file, rowNames = FALSE)
+
+
+############################Database##############################################333
+library(DBI)
+library(RSQLite)
+library(dplyr)
+
+portaldb <- dbConnect(SQLite(), "portal.sqlite")
+
+dbListTables(portaldb)
 
