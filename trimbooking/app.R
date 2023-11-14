@@ -40,30 +40,11 @@ server <- function(input, output) {
       return(NULL)
     readxl::read_excel(inFile$datapath)})
   
-  
-  
-  # Function to read Excel file
-  data <- reactive({
-    req(input$quantity_file)
-    excel_file <- read_excel(input$quantity_file$datapath, sheet = input$sheet)
-    return(excel_file)
-  })
-  
-  # Render the table
-  output$table1 <- renderTable({
-    data()
-  })
-  
-  # Perform calculations and display the result
-  observeEvent(input$calculate, {
-    data_df <- data()
-    value <- input$value
-    result <- sum(data_df$value) * value
-    output$result <- renderText({
-      paste("Result of calculation: ", result)
-    })
-  })
-  
+  output$table2 <- renderTable({
+    inFile <- input$BOM_file
+    if(is.null(inFile))
+      return(NULL)
+    readxl::read_excel(inFile$datapath)})
 }
 
 
