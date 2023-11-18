@@ -2,36 +2,23 @@ library(shiny)
 library(readxl)
 library(shinydashboard)
 
-shinyServer(function(input,output) {
-    data <- reactiveVal(NULL)
-    
-    observeEvent(input$processBtn, {
-        req(input$file, input$invoiceNumber, input$destinationName)
-        
-        # Read the uploaded Excel file
-        inFile <- input$file
-        df <- read_excel(inFile$datapath)
-        
-        # Check if the 'Destination' column exists in the data
-        if ('Destination' %in% colnames(df)) {
-            # Filter data based on the given destination name
-            filtered_df <- df[df$Destination == input$destinationName, ]
-            
-            # Store data in the reactive value for later use
-            data(filtered_df)
-        } else {
-            # If 'Destination' column is not present, use the entire data
-            data(df)
-        }
+shinyServer(function(input, output, session) {
+    output$invoice_files <- DT::renderDT({
+        DT::datatable(input$upload_invoice, selection = "single")
     })
     
-    observe({
-        df <- data()
+    # read all the uploaded files
+    all_files <- reactive({
+        req(input$upload_invoice)
+        purrr::map(input$upload_invoice$datapath, read_excel) %>%
+            purrr::set_names(input$upload_invoice$name)
+    })
+    
+    #select a row in DT files and display the corresponding table
+    output$selected_invoice_table <- renderTable({
+        req(input$invoice_files_rows_selected)
         
-        # Display the details in the "Details" tab
-        output$invoiceTableDetails <- renderTable({
-            df
-        })
+        all_files()[[input$invoice_files_rows_selected]]
     })
 })
 

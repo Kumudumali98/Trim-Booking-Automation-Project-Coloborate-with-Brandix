@@ -1,29 +1,39 @@
 library(shiny)
 library(readxl)
 library(shinydashboard)
+library(DT)
 
 shinyUI(dashboardPage(
     dashboardHeader(title = "Invoice App"),
     dashboardSidebar(
         sidebarMenu(
-            menuItem("Upload Invoice", tabName = "upload", icon = icon("cloud-upload")),
-            menuItem("Details", tabName = "details", icon = icon("info"))
+            menuItem("Upload Invoice", tabName = "invoice", icon = icon("cloud-upload")),
+            menuItem("Data", tabName = "data", icon = icon("info")),
+            menuItem("Results", tabName = "results", icon = icon("info")),
+            menuItem("Comparison", tabName = "comparison", icon = icon("info"))
         )
     ),
     dashboardBody(
         tabItems(
             tabItem(
-                tabName = "upload",
+                tabName = "invoice", 
                 h2("Upload Invoice"),
-                fileInput("file", "Choose Excel File", accept = c(".xlsx")),
                 textInput("invoiceNumber", "Enter Invoice Number"),
-                textInput("destinationName", "Enter Destination Name"),
+                fileInput("upload_invoice", NULL, buttonLabel = "Upload Invoice...", multiple = TRUE),
                 actionButton("processBtn", "Process Invoice")
             ),
             tabItem(
-                tabName = "details",
-                h2("Details"),
-                tableOutput("invoiceTableDetails")
+                tabName = "data",
+                DT::DTOutput("invoice_files"),
+                tableOutput("selected_invoice_table")
+            ),
+            tabItem(
+                tabName = "result",
+                # Add UI elements specific to the "Results" tab here
+            ),
+            tabItem(
+                tabName = "comparison",
+                # Add UI elements specific to the "Results" tab here
             )
         )
     )
