@@ -32,8 +32,10 @@ shinyUI(dashboardPage(
             ),
             tabItem(
                 tabName = "results",
-                DT::DTOutput("modified_table_show"),
-                tableOutput("modifiedTable")
+                DT::DTOutput("result_files"),
+                tableOutput("selected_prosessed_table"),
+                
+                downloadButton("dl", "Download")
             ),
             tabItem(
                 tabName = "comparison"

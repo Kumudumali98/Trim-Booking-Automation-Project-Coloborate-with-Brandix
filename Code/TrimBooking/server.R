@@ -11,6 +11,7 @@ shinyServer(function(input, output, session) {
         DT::datatable(input$upload_invoice, selection = "single")
     })
     
+    
     # read all the uploaded files
     all_files <- reactive({
         req(input$upload_invoice)
@@ -40,10 +41,6 @@ shinyServer(function(input, output, session) {
             quentity <- quentity %>%
                 mutate_at(size_cols, ~replace(., is.na(.), 0))
             
-            # Print the 'quentity' data frame for debugging
-            #print("Printing 'quentity' data frame:")
-            #print(quentity)
-            
             # Extract necessary columns to a new data frame
             necessary_cols <- c("Style Number", "Style Number TB", "Colors", "Colour")
             Order_Summary <- quentity %>%
@@ -54,21 +51,29 @@ shinyServer(function(input, output, session) {
                 Order_Summary[size_cols[i - 4]] <- ceiling(quentity[[i]] * quentity[[5]])
             }
             
-            # Print the 'Order_Summary' data frame for debugging
-           # print("Printing 'Order_Summary' data frame:")
-            #print(Order_Summary)
-            
             # Save the modified data
             modified_data(Order_Summary)
         }
     })
     
-    # Display the modified table
-    output$modifiedTable <- renderTable({
-        if (!is.null(modified_data())) {
-            modified_data()
-        }
-    }, caption = "Modified Table")
+    output$result_files <- DT::renderDT({
+        DT::datatable(modified_data(), selection = "single")
+    })
+    
+    
+    
+    #select a row in DT files and display the corresponding table
+    output$selected_prosessed_table <- renderTable({
+        req(input$result_files_rows_selected)
+        
+        all_files()[[input$result_files_rows_selected]]
+    })
+    
+    output$dl <- downloadHandler(
+        filename = function() {"Order_Summary.xlsx"},
+        content = function(excel_file) {
+            write.xlsx(modified_data(), excel_file, rowNames = FALSE)}
+    )
     
 })
 
