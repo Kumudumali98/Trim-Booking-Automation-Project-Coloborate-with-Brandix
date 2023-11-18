@@ -52,9 +52,21 @@ shinyServer(function(input, output, session) {
                 Order_Summary <- quentity %>%
                     select(necessary_cols, "UNITS")
                 
+                # Initialize Total_Order_Summary if it's the first iteration
+                if(counter == 0){
+                    Total_Order_Summary <- quentity %>% 
+                        select(necessary_cols)
+                    
+                    Total_Order_Summary[, size_cols] <- 0
+                    counter = 1
+                }
+                
+                Total_Order_Summary[5] <- Total_Order_Summary[5] + quentity[5]
+                
                 # Perform calculations and update the new data frame
                 for (i in 6:13) {
                     Order_Summary[size_cols[i - 4]] <- ceiling(quentity[[i]] * quentity[[5]])
+                    Total_Order_Summary[i] <- ceiling((Total_Order_Summary[i] + Order_Summary[i])*1.02)
                 }
                 
                 # Save the modified data to the list
@@ -65,7 +77,7 @@ shinyServer(function(input, output, session) {
             combined_data <- bind_rows(processed_data_list)
             
             # Save the combined data
-            modified_data(combined_data)
+            modified_data(Total_Order_Summary)
         }
     })
     
