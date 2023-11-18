@@ -1,7 +1,10 @@
 library(shiny)
-library(readxl)
 library(shinydashboard)
 library(DT)
+library(readxl)
+library(openxlsx)
+library(dplyr)
+library(janitor)
 
 shinyUI(dashboardPage(
     dashboardHeader(title = "Invoice App"),
@@ -28,11 +31,12 @@ shinyUI(dashboardPage(
                 tableOutput("selected_invoice_table")
             ),
             tabItem(
-                tabName = "result",
-                # Add UI elements specific to the "Results" tab here
+                tabName = "results",
+                DT::DTOutput("modified_table_show"),
+                tableOutput("modifiedTable")
             ),
             tabItem(
-                tabName = "comparison",
+                tabName = "comparison"
                 # Add UI elements specific to the "Results" tab here
             )
         )
