@@ -66,15 +66,15 @@ shinyServer(function(input, output, session) {
                 # Perform calculations and update the new data frame
                 for (i in 6:13) {
                     Order_Summary[size_cols[i - 4]] <- ceiling(quentity[[i]] * quentity[[5]])
-                    Total_Order_Summary[i] <- ceiling((Total_Order_Summary[i] + Order_Summary[i])*1.02)
+                    Total_Order_Summary[i] <- ceiling((Total_Order_Summary[i] + Order_Summary[i]) * 1.02)
                 }
                 
                 # Save the modified data to the list
-                processed_data_list[[file_index]] <- Order_Summary
+                # processed_data_list[[file_index]] <- Order_Summary
             }
             
             # Combine all processed data frames into a single data frame
-            combined_data <- bind_rows(processed_data_list)
+            # combined_data <- bind_rows(processed_data_list)
             
             # Save the combined data
             modified_data(Total_Order_Summary)
