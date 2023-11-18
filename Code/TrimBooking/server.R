@@ -28,33 +28,47 @@ shinyServer(function(input, output, session) {
     
     
     modified_data <- reactiveVal(NULL)
+    
     observeEvent(input$processBtn, {
         if (!is.null(all_files())) {
             # Your existing code
             counter = 0
             size_cols <- c("UNITS", "3XS", "2XS", "XS", "S", "M", "L", "XL", "2XL")
             
-            # Extract a specific data frame from the list
-            quentity <- all_files()[[1]]  # Adjust the index based on your data structure
+            # Initialize an empty list to store processed data frames
+            processed_data_list <- list()
             
-            # Replace NA values with 0 in specified columns
-            quentity <- quentity %>%
-                mutate_at(size_cols, ~replace(., is.na(.), 0))
-            
-            # Extract necessary columns to a new data frame
-            necessary_cols <- c("Style Number", "Style Number TB", "Colors", "Colour")
-            Order_Summary <- quentity %>%
-                select(necessary_cols, "UNITS")
-            
-            # Perform calculations and update the new data frame
-            for (i in 6:13) {
-                Order_Summary[size_cols[i - 4]] <- ceiling(quentity[[i]] * quentity[[5]])
+            # Loop through all the uploaded files
+            for (file_index in seq_along(all_files())) {
+                # Extract a specific data frame from the list
+                quentity <- all_files()[[file_index]]
+                
+                # Replace NA values with 0 in specified columns
+                quentity <- quentity %>%
+                    mutate_at(size_cols, ~replace(., is.na(.), 0))
+                
+                # Extract necessary columns to a new data frame
+                necessary_cols <- c("Style Number", "Style Number TB", "Colors", "Colour")
+                Order_Summary <- quentity %>%
+                    select(necessary_cols, "UNITS")
+                
+                # Perform calculations and update the new data frame
+                for (i in 6:13) {
+                    Order_Summary[size_cols[i - 4]] <- ceiling(quentity[[i]] * quentity[[5]])
+                }
+                
+                # Save the modified data to the list
+                processed_data_list[[file_index]] <- Order_Summary
             }
             
-            # Save the modified data
-            modified_data(Order_Summary)
+            # Combine all processed data frames into a single data frame
+            combined_data <- bind_rows(processed_data_list)
+            
+            # Save the combined data
+            modified_data(combined_data)
         }
     })
+    
     
     output$result_files <- DT::renderDT({
         DT::datatable(modified_data(), selection = "single")
