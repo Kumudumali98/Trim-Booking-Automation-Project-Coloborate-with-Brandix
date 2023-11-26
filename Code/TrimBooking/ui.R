@@ -24,6 +24,7 @@ shinyUI(dashboardPage(
                 h2("Upload Invoice"),
                 textInput("invoiceNumber", "Enter Invoice Number"),
                 fileInput("upload_invoice", NULL, buttonLabel = "Upload Invoice...", multiple = TRUE),
+                numericInput("buffer", "Buffer (%):", 0, min = 1, max = 100),
                 actionButton("process_order", "Process Order"),
                 fileInput("upload_plm_data", NULL, buttonLabel = "Upload PLM B...", multiple = FALSE),
                 actionButton("process_RMQty", "Process Raw Material Quantity")

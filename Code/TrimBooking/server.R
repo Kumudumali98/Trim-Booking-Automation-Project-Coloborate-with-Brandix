@@ -94,7 +94,7 @@ shinyServer(function(input, output, session) {
             }
             
             for (i in 6:13) {
-                Total_Order_Summary[i] <- ceiling(Total_Order_Summary[i] * 1.02)
+                Total_Order_Summary[i] <- ceiling(Total_Order_Summary[i] * (100+input$buffer)/100)
             }
             
             # Combine all processed data frames into a single data frame
