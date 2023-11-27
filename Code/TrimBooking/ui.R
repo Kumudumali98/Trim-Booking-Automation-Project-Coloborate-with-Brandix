@@ -39,21 +39,23 @@ shinyUI(dashboardPage(
             ),
             tabItem(
                 tabName = "totalGarmentOrder",
-                DT::DTOutput("totalOrderQty"),
                 tableOutput("total_order_qty"),
                 
                 downloadButton("dlTotal_Order_Qty", "Download")
             ),
             tabItem(
                 tabName = "totalRMQty",
-                DT::DTOutput("tRMQty_file"),
                 tableOutput("total_RM_qty"),
                 
                 downloadButton("dlTotal_RM_Qty", "Download")
             ),
             tabItem(
-                tabName = "comparison"
-                # Add UI elements specific to the "Results" tab here
+                tabName = "comparison",
+                fileInput("upload_file1", NULL, buttonLabel = "Upload Initial Order...", multiple = FALSE),
+                fileInput("upload_file2", NULL, buttonLabel = "Upload Confiremed Order ...", multiple = FALSE),
+                actionButton("process_comparison", "Comparison"),
+                tableOutput("comparison"),
+                downloadButton("dl_comparison", "Download")
             )
         )
     )

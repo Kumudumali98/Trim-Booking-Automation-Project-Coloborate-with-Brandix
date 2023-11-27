@@ -106,18 +106,8 @@ shinyServer(function(input, output, session) {
     })
     
     
-    output$totalOrderQty <- DT::renderDT({
-        DT::datatable(modified_data(), selection = "single")
-    })
-    
-    
-    
     #select a row in DT files and display the corresponding table
-    output$total_order_qty <- renderTable({
-        req(input$totalOrderQty_rows_selected)
-        
-        destinationQty_files()[[input$totalOrderQty_rows_selected]]
-    })
+    output$total_order_qty <- renderTable(modified_data())
     
     output$dlTotal_Order_Qty <- downloadHandler(
         filename = function() {"Order_Summary.xlsx"},
@@ -167,25 +157,64 @@ shinyServer(function(input, output, session) {
     })
     
     
-    output$tRMQty_file <- DT::renderDT({
-        DT::datatable(TotalRM_data(), selection = "single")
+    
+    #select a row in DT files and display the corresponding table
+    output$total_RM_qty <- renderTable(TotalRM_data())
+    
+    
+    output$dlTotal_RM_Qty <- downloadHandler(
+        filename = function() {"Total_RM_Qty.xlsx"},
+        content = function(excel_file) {
+            write.xlsx(TotalRM_data(), excel_file, rowNames = FALSE)
+        }
+    ) 
+    
+    
+###############################################################################################    
+    # read the uploaded file
+    before_confirmed <- reactive({
+        req(input$upload_file1)
+        read_excel(input$upload_file1$datapath)
     })
     
+    after_confirmed <- reactive({
+        req(input$upload_file2)
+        read_excel(input$upload_file2$datapath)
+    })
+    
+    Comparison_data <- reactiveVal(NULL)
+    
+    observeEvent(input$process_comparison, {
+        if (!is.null(before_confirmed()) && !is.null(after_confirmed())) {
+            
+            before_con <- before_confirmed()
+            after_con <- after_confirmed()
+            
+            comparison <- before_con %>% select(`RM Reference`, `RM Color`)
+            
+            # Calculate the differences for retail prices and quantities
+            size_columns <- c("3XS", "2XS", "XS", "S", "M", "L", "XL", "2XL")
+            for (col in size_columns) {
+                comparison[[paste0(col, "_Diff.")]] <- before_con[col] - after_con[col]
+            }
+            
+            # Save the combined data
+            Comparison_data(comparison)
+        }
+    })
     
     
     #select a row in DT files and display the corresponding table
-    output$total_RM_qty <- renderTable({
-        req(input$tRMQty_file_rows_selected)
-        
-        plm_file()[[input$tRMQty_file_rows_selected]]
-    })
+    output$comparison <- renderTable(Comparison_data())
     
-    output$dltotal_RM_qty <- downloadHandler(
-        filename = function() {"Total_RM_Qty.xlsx"},
+    output$dl_comparison <- downloadHandler(
+        filename = function() {"Comparison.xlsx"},
         content = function(excel_file) {
-            write.xlsx(TotalRM_data(), excel_file, rowNames = FALSE)}
+            write.xlsx(Comparison_data(), excel_file, rowNames = FALSE)
+        }
     )
     
+ 
     
 })
 
