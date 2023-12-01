@@ -7,14 +7,17 @@ library(dplyr)
 library(janitor)
 
 shinyUI(dashboardPage(
-    dashboardHeader(title = "Invoice App"),
+    skin = "red",
+    dashboardHeader(title = "Brandix Trim Booking Calculator",titleWidth = 350),
     dashboardSidebar(
+        width = 350,
+        
         sidebarMenu(
-            menuItem("Upload Invoice", tabName = "invoice", icon = icon("cloud-upload")),
-            menuItem("Data", tabName = "data", icon = icon("info")),
-            menuItem("Total Garment Order", tabName = "totalGarmentOrder", icon = icon("info")),
-            menuItem("Total Raw Material Quantity", tabName = "totalRMQty", icon = icon("info")),
-            menuItem("Comparison", tabName = "comparison", icon = icon("info"))
+            menuItem("Upload Invoice", tabName = "invoice", icon = icon("cloud-upload", style = "padding-right:10px;")),
+            menuItem("Data", tabName = "data", icon = icon("table", style = "padding-right:10px;")),
+            menuItem("Total Garment Order", tabName = "totalGarmentOrder", icon = icon("arrow-down-a-z", style = "padding-right:10px;")),
+            menuItem("Total Raw Material Quantity", tabName = "totalRMQty", icon = icon("arrow-down-1-9", style = "padding-right:10px;")),
+            menuItem("Comparison", tabName = "comparison", icon = icon("code-compare", style = "padding-right:10px;"))
         )
     ),
     dashboardBody(
@@ -41,13 +44,15 @@ shinyUI(dashboardPage(
                 tabName = "totalGarmentOrder",
                 tableOutput("total_order_qty"),
                 
-                downloadButton("dlTotal_Order_Qty", "Download")
+                downloadButton("dlTotal_Order_Qty_w_buffer", "with buffer Download"),
+                downloadButton("dlTotal_Order_Qty_wo_buffer", "without buffer Download")
             ),
             tabItem(
                 tabName = "totalRMQty",
                 tableOutput("total_RM_qty"),
                 
-                downloadButton("dlTotal_RM_Qty", "Download")
+                downloadButton("dlTotal_RM_Qty", "with buffer Download"),
+                downloadButton("dlTotal_RM_Qty_wo_buffer", "without buffer Download")
             ),
             tabItem(
                 tabName = "comparison",
