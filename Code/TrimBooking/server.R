@@ -7,6 +7,15 @@ library(dplyr)
 library(janitor)
 
 shinyServer(function(input, output, session) {
+    
+    output$home_img <- renderImage({
+        
+        list(src = "../../www/Logo.png"
+             )
+        
+    }, deleteFile = F)
+    
+    
     output$invoice_files <- DT::renderDT({
         DT::datatable(input$upload_invoice, selection = "single")
     })
@@ -47,7 +56,8 @@ shinyServer(function(input, output, session) {
     
     
     ####################3
-    modified_data <- reactiveVal(NULL)
+    total_Order_w_buffer_data <- reactiveVal(NULL)
+    total_Order_wo_buffer_data <- reactiveVal(NULL)
     
     observeEvent(input$process_order, {
         if (!is.null(destinationQty_files())) {
@@ -93,6 +103,8 @@ shinyServer(function(input, output, session) {
                  processed_data_list[[file_index]] <- Order_Summary
             }
             
+            Total_Order_wo_buffer <- Total_Order_Summary
+            
             for (i in 6:13) {
                 Total_Order_Summary[i] <- ceiling(Total_Order_Summary[i] * (100+input$buffer)/100)
             }
@@ -101,23 +113,30 @@ shinyServer(function(input, output, session) {
             # combined_data <- bind_rows(processed_data_list)
             
             # Save the combined data
-            modified_data(Total_Order_Summary)
+            total_Order_w_buffer_data(Total_Order_Summary)
+            total_Order_wo_buffer_data(Total_Order_wo_buffer)
         }
     })
     
     
     #select a row in DT files and display the corresponding table
-    output$total_order_qty <- renderTable(modified_data())
+    output$total_order_qty <- renderTable(total_Order_w_buffer_data())
     
-    output$dlTotal_Order_Qty <- downloadHandler(
-        filename = function() {"Order_Summary.xlsx"},
+    output$dlTotal_Order_Qty_w_buffer <- downloadHandler(
+        filename = function() {"Order_Summary_with_buffer.xlsx"},
         content = function(excel_file) {
-            write.xlsx(modified_data(), excel_file, rowNames = FALSE)}
+            write.xlsx(total_Order_w_buffer_data(), excel_file, rowNames = FALSE)}
     )
     
+    output$dlTotal_Order_Qty_wo_buffer <- downloadHandler(
+        filename = function() {"Order_Summary_without_buffer.xlsx"},
+        content = function(excel_file) {
+            write.xlsx(total_Order_wo_buffer_data(), excel_file, rowNames = FALSE)}
+    )
     ###################################################3
     
     TotalRM_data <- reactiveVal(NULL)
+    TotalRM_wo_buffer_data <- reactiveVal(NULL)
     
     observeEvent(input$process_RMQty, {
         if (!is.null(plm_file())) {
@@ -125,7 +144,7 @@ shinyServer(function(input, output, session) {
             plm_data <- plm_file()
             plm_data <- plm_data %>% mutate(Style_Color = toupper(plm_data$`Color`), .keep = "unused")
             
-            Total_Order_Summary <-  modified_data() %>% rename(Style_Color = Colors)
+            Total_Order_Summary <-  total_Order_w_buffer_data() %>% rename(Style_Color = Colors)
             
             
             merged_df <- merge(x = plm_data, y = Total_Order_Summary,
@@ -153,6 +172,35 @@ shinyServer(function(input, output, session) {
             
             # Save the combined data
             TotalRM_data(result)
+            
+            ######Total order summary without buffer
+            Total_Order_wo_buffer <-  total_Order_w_buffer_data() %>% rename(Style_Color = Colors)
+            
+            
+            merged_df2 <- merge(x = plm_data, y = Total_Order_wo_buffer,
+                               by = c("Style Number", "Style_Color"),
+                               all.x = T)
+            
+            result2 <- merged_df2
+            
+            result2[12:19] <- 0
+            
+            counter = 12
+            for (i in 12:19) {
+                result2[counter] <- ceiling(merged_df2[i] * merged_df2$Consumption)
+                counter = counter + 1
+            }
+            
+            result2 <- result2 %>% rename(Style_Number = `Style Number`)
+            result2 <- result2[result2$Consumption != 0 | result2$`RM Color` != "N/A",]
+            
+            
+            result2 <- result2 %>%
+                group_by(`RM Reference`, `RM Color`) %>%
+                summarise(across(c(`3XS`, `2XS`, `XS`, `S`, `M`, `L`, `XL`, `2XL`), sum))
+            
+            # Save the combined data
+            TotalRM_wo_buffer_data(result2)
         }
     })
     
@@ -169,8 +217,15 @@ shinyServer(function(input, output, session) {
         }
     ) 
     
+    output$dlTotal_RM_Qty_wo_buffer <- downloadHandler(
+        filename = function() {"Total_RM_Qty_without_buffer.xlsx"},
+        content = function(excel_file) {
+            write.xlsx(TotalRM_wo_buffer_data(), excel_file, rowNames = FALSE)
+        }
+    )
     
-###############################################################################################    
+    
+    ###############################################################################################    
     # read the uploaded file
     before_confirmed <- reactive({
         req(input$upload_file1)
@@ -214,7 +269,5 @@ shinyServer(function(input, output, session) {
         }
     )
     
- 
     
 })
-
