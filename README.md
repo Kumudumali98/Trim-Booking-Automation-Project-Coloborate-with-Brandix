@@ -1,1 +1,1 @@
-# MT-325-Trim-Booking-Group
+# MT-325-Trim-Booking-Automation-Project
